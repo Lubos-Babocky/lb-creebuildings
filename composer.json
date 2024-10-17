@@ -1,0 +1,13 @@
+{
+    "name": "lbwp/creebuildings-api",
+    "description": "Plugin for data import from cree API",
+    "type": "wordpress-plugin",
+    "autoload": {
+        "psr-4": {
+            "Lb\\CreebuildingsAPI\\": "includes/"
+        }
+    },
+    "require": {
+        "php": ">=8.2"
+    }
+}
