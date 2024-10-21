@@ -1,41 +1,5 @@
 <?php
 /** @var \LB\CreeBuildings\Controller\AdminPageController $this */
-
-use LB\CreeBuildings\Service\DatabaseService,
-    LB\CreeBuildings\Repository\ProjectRepository;
-
-/** @var ProjectRepository $projectRepository */
-$projectRepository = DatabaseService::GetInstance()->getRepository(ProjectRepository::class);
-
-$switchPostStatus = function ($projectId, $status) {
-    return add_query_arg(
-    [
-        'page' => 'lb-creebuildings',
-        'action' => 'switch-post-status',
-        'project_id' => $projectId,
-        'new_status' => $status
-    ],
-    admin_url('admin.php')
-    );
-};
-
-if (!empty($action = filter_input(INPUT_GET, 'action'))) {
-    try {
-        switch ($action) {
-            case 'switch-post-status':
-                $projectRepository->updateProjectPostStatus(filter_input(INPUT_GET, 'project_id') ?: 0, filter_input(INPUT_GET, 'new_status') ?: 'draft');
-                break;
-            case 'show-project-images':
-                
-                
-                break;
-        }
-    } catch (\Exception $ex) {
-        echo '<pre>';
-        var_dump($ex);
-        die(__METHOD__ . '::' . __LINE__);
-    }
-}
 ?>
 
 <div class="container-fluid">
@@ -74,10 +38,7 @@ if (!empty($action = filter_input(INPUT_GET, 'action'))) {
                             <td><?= $project['post_id'] ?></td>
                             <td><?= $project['post_status'] ?></td>
                             <td>
-
-                                
-                                
-                                <a href="<?= $switchPostStatus($project['project_id'], $project['post_status'] === 'publish' ? 'draft' : 'publish') ?>">
+                                <a href="<?= $this->buildSwithPostStatusUri($project); ?>" aria-label="<?= $project['post_status'] === 'publish' ? 'Set to draft' : 'Publish post' ?>">
                                     <span title="<?= $project['post_status'] === 'publish' ? 'Set to draft' : 'Publish post' ?>" class="btn icon-eye-<?= $project['post_status'] === 'publish' ? 'hide' : 'show' ?>"></span>
                                 </a>
                             </td>

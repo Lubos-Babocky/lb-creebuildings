@@ -2,7 +2,8 @@
 
 namespace LB\CreeBuildings\Controller;
 
-use LB\CreeBuildings\Service\AbstractService;
+use LB\CreeBuildings\Repository\ProjectRepository,
+    LB\CreeBuildings\Service\DatabaseService;
 
 /**
  * Description of AdminPageController
@@ -11,17 +12,28 @@ use LB\CreeBuildings\Service\AbstractService;
  */
 class AdminPageController extends AbstractController {
 
-    public function __construct(
-            protected readonly \LB\CreeBuildings\Repository\ProjectRepository $projectRepository
-    ) {
-
-    }
+    public ProjectRepository $projectRepository;
 
     protected function injectDependencies(): void {
-        
+        $this->projectRepository = DatabaseService::GetInstance()->getRepository(ProjectRepository::class);
     }
 
     public function indexAction(): void {
         
+    }
+
+    public function switchPostStatusAction(): void {
+        $this->projectRepository->updateProjectPostStatus($this->getArgument('project_id'), $this->getArgument('post_status', 'draft'));
+        $this->redirectToAction('index');
+    }
+
+    public function buildSwithPostStatusUri(array $project): string {
+        return $this->buildActionUri(
+                        'switchPostStatus',
+                        [
+                            'project_id' => $project['project_id'],
+                            'post_status' => $project['post_status'] === 'publish' ? 'draft' : 'publish'
+                        ]
+                );
     }
 }

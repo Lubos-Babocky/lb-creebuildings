@@ -35,7 +35,7 @@ function lb_creebuildings_admin_menu() {
 add_action('admin_menu', 'lb_creebuildings_admin_menu');
 
 function lb_creebuildings_render_admin_page() {
-    include plugin_dir_path(__FILE__).'templates/admin-page.php';
+    (new \LB\CreeBuildings\Controller\AdminPageController())->serve();
 }
 
 function lb_creebuildings_enqueue_admin_styles( $hookSuffix ) {
