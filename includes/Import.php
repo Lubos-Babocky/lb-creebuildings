@@ -12,6 +12,7 @@ use LB\CreeBuildings\DataHandler\ProjectDataHandler,
     LB\CreeBuildings\Service\DatabaseService,
     LB\CreeBuildings\Repository\ProjectRepository,
     LB\CreeBuildings\Repository\ProjectImageRepository,
+    LB\CreeBuildings\DataHandler\WordpressDataHandler,
     LB\CreeBuildings\Repository\ProjectPropertyRepository;
 
 /**
@@ -49,6 +50,7 @@ class Import extends AbstractService {
             $this->updateBaseProjectData();
             $this->updateAllProjectData();
             $this->updateAllImagePublicUrls();
+            (new WordpressDataHandler())->handle();
         } catch (\Exception $ex) {
             $this->logService->handleException($ex);
         }

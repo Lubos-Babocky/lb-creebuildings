@@ -1,9 +1,14 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-$start = microtime(true);
-require_once './autoload.php';
-$mid = microtime(true);
-echo sprintf("autoload %s<br>", $mid - $start);
-$import = LB\CreeBuildings\Import::GetInstance()->runImport();
+require './autoload.php';
+
+
+$creeapiService = \LB\CreeBuildings\Service\CreeApiService::GetInstance();
+$project = $creeapiService->loadProject('8EPHN5M14AIIQ');
+
+unset($project['description']);
+unset($project['embeddedImages']);
+unset($project['attachments']);
+
+echo '<pre>';
+var_dump($project);
+die(__METHOD__ . '::' . __LINE__);
