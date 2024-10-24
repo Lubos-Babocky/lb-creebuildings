@@ -39,4 +39,13 @@ class ProjectPropertyConnectionRepository extends AbstractRepository {
                 ->fetchAll();
         return array_column($avaliableTypesOfUse, 'property_value');
     }
+
+    public function findProjectCategoryRelations(): array {
+        return $this->pdo->query(
+                "SELECT `P`.`post_id`, `M`.`property_value`"
+                . " FROM `lb_creebuildings_project_property_mm` AS `M`"
+                . " LEFT JOIN `lb_creebuildings_project` AS `P` ON `M`.`project_id` = `P`.`project_id`"
+                . " WHERE `M`.`property_id` = 'general-TypeOfUse'"
+        )->fetchAll();
+    }
 }

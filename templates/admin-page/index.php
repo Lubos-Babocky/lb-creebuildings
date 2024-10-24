@@ -1,5 +1,6 @@
 <?php
 /** @var \LB\CreeBuildings\Controller\AdminPageController $this */
+isset($this) || die;
 ?>
 
 <div class="container-fluid">
@@ -26,7 +27,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($projectRepository->findProjectsDataForAdminPage() as $i => $project): ?>
+                    <?php foreach ($this->projectRepository->findProjectsDataForAdminPage() as $i => $project): ?>
                         <tr>
                             <td><?= $i + 1 ?></td>
                             <td><?= $project['project_id'] ?></td>

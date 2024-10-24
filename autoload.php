@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists('get_option')) {
-    $wpLoadPath = realpath(__DIR__.'/../../../wp-load.php');
+    $wpLoadPath = realpath(__DIR__ . '/../../../wp-load.php');
     if (file_exists($wpLoadPath)) {
         require_once $wpLoadPath;
     } else {

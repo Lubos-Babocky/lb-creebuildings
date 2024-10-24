@@ -26,7 +26,10 @@ class ConfigurationService extends AbstractService {
     /**
      * @throws \Exception
      */
-    public function getConfig(string $propertyName): string {
+    public function getConfig(?string $propertyName = null): string|array {
+        if($propertyName === null) {
+            return $this->configuration;
+        }
         if (array_key_exists($propertyName, $this->configuration)) {
             return $this->configuration[$propertyName];
         } else {

@@ -29,6 +29,7 @@ class WordpressDataHandler extends AbstractDataHandler {
     }
 
     public function handle(): void {
+        $this->updateTags();
         $this->updateOptionsOfAcfStatusField();
         $this->updateProjectPosts();
         $this->updateProjectPostMetaData();
@@ -69,6 +70,17 @@ class WordpressDataHandler extends AbstractDataHandler {
     protected function updateProjectPostMetaData(): void {
         foreach ($x = $this->projectPropertyConnectionRepository->findAllConnections() as $projectProperty) {
             update_field($projectProperty['acf_id'], $projectProperty['property_value'], $projectProperty['post_id']);
+        }
+    }
+
+    protected function updateTags(): void {
+        foreach ($this->projectPropertyConnectionRepository->findAvailableTypesOfUse() as $typeOfUse) {
+            if(null === term_exists($typeOfUse, $this->configurationService->getConfig('WP_PROJECT_TAG_TAXONOMY'))) {
+                wp_insert_term($typeOfUse, $this->configurationService->getConfig('WP_PROJECT_TAG_TAXONOMY'));
+            }
+        }
+        foreach($this->projectPropertyConnectionRepository->findProjectCategoryRelations() as $relation) {
+            wp_set_post_terms($relation['post_id'], [$relation['property_value']], $this->configurationService->getConfig('WP_PROJECT_TAG_TAXONOMY'), false);
         }
     }
 }
