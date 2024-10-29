@@ -28,13 +28,23 @@ abstract class AbstractController {
             protected readonly string $pluginIcon,
             protected readonly int $pluginPosition
     ) {
+        $this->initController();
+    }
+
+    private function initController(): void {
+        if(empty($getParams = filter_input_array(INPUT_GET))) {
+            return;
+        }
+        $this->handleArguments();
         $this->configurationService = ConfigurationService::GetInstance();
         $this->injectDependencies();
-        $this->handleArguments();
     }
 
     private function handleArguments(): void {
-        $this->arguments = filter_input_array(INPUT_GET);
+        if(empty($getParams = filter_input_array(INPUT_GET))) {
+            return;
+        }
+        $this->arguments = $getParams;
         if (!array_key_exists('page', $this->arguments) || empty($this->arguments['page']) || $this->arguments['page'] === static::DefaultPage) {
             $this->arguments['action'] = $this->defaultAction;
         } else {

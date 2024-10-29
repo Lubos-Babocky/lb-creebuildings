@@ -1,4 +1,5 @@
 Classes/
 Resources/
 logs/
+config.ini
 test.php
