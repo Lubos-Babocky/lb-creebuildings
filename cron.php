@@ -1,6 +1,15 @@
 <?php
-$start = microtime(true);
+
 require_once './autoload.php';
-$mid = microtime(true);
-echo sprintf("autoload %s<br>", $mid - $start);
-$import = LB\CreeBuildings\Import::GetInstance()->runImport();
+
+/*
+  $partners = \LB\CreeBuildings\Service\CreeApiService::GetInstance()->loadAllPartners();
+  ob_clean();
+  header('Content-Type: application/json');
+  die(json_encode($partners));
+  /* */
+
+
+
+LB\CreeBuildings\Import::GetInstance()
+    ->runImport();

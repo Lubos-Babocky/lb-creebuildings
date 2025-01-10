@@ -1,7 +1,6 @@
 CREATE TABLE `lb_creebuildings_project` (
 	`id` int unsigned not null AUTO_INCREMENT,
 	`post_id` int unsigned default 0 not null,
-	`crdate` int unsigned default 0 not null,
 	`tstamp` int unsigned default 0 not null,
 	`access_type` varchar(255) default '' not null,
 	`project_id` varchar(255) default '' not null,
@@ -39,7 +38,6 @@ CREATE TABLE `lb_creebuildings_project_image` (
 
 CREATE TABLE `lb_creebuildings_project_image_copy` (
 	`uid` varchar(50) default '' not null,
-	`crdate` int unsigned default 0 not null,
 	`tstamp` int unsigned default 0 not null,
 	`project_id` varchar(255) default '' not null,
 	`image_id` varchar(255) default '' not null,
@@ -56,7 +54,6 @@ CREATE TABLE `lb_creebuildings_project_image_copy` (
 
 CREATE TABLE `lb_creebuildings_project_property` (
 	`uid` varchar(50) default '' not null,
-	`crdate` int unsigned default 0 not null,
 	`tstamp` int unsigned default 0 not null,
 	`group_id` varchar(50) default '' not null,
 	`group_name` varchar(50) default '' not null,
@@ -95,7 +92,6 @@ CREATE TABLE `lb_creebuildings_project_participant_role` (
 CREATE TABLE `lb_creebuildings_partner` (
 	`id` int unsigned not null AUTO_INCREMENT,
 	`post_id` int unsigned default 0 not null,
-	`crdate` int unsigned default 0 not null,
 	`tstamp` int unsigned default 0 not null,
 	`title` varchar(255) default '' not null,
 	`subtitle` varchar(255) default '' not null,

@@ -1,5 +1,4 @@
-Classes/
-Resources/
-logs/
-config.ini
-test.php
+logs/access.log
+logs/error.log
+configuration/config.ini
+test/

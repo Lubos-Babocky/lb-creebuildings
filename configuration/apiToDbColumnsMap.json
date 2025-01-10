@@ -1,0 +1,36 @@
+{
+    "LB\\CreeBuildings\\ApiDataParser\\Partner\\PartnerDataParser": {
+        "id": "id",
+        "modified": "modifiedAt",
+        "title": "displayName",
+        "subtitle": "subTitle",
+        "latitude": "lat",
+        "longitude": "lon",
+        "address_street_1": "street_1",
+        "address_street_2": "street_2",
+        "address_city": "city",
+        "address_state": "state",
+        "address_zip": "postCode",
+        "address_country_name": "country.name",
+        "address_country_name": "country.nameIso2",
+        "avatar_api_url": "avatar.attachmentUri"
+    },
+    "LB\\CreeBuildings\\ApiDataParser\\Project\\ProjectDataParser": {
+        "project_id": "id",
+        "title": "displayName",
+        "subtitle": "subTitle",
+        "latitude": "lat",
+        "longitude": "lon",
+        "modified": "modifiedAt"
+    },
+    "LB\\CreeBuildings\\ApiDataParser\\Project\\BackgroundImageDataParser": {
+        "file_id": "id",
+        "modified": "modifiedAt",
+        "api_url": "attachmentUri"
+    },
+    "LB\\CreeBuildings\\ApiDataParser\\Project\\AttachmentDataParser": {
+        "file_id": "id",
+        "modified": "modifiedAt",
+        "api_url": "attachmentUri"
+    }
+}

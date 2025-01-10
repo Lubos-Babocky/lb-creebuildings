@@ -8,6 +8,9 @@ if (!function_exists('get_option')) {
         die('wp-load.php not found!');
     }
 }
+if (!function_exists('wp_generate_attachment_metadata')) {
+    require_once(ABSPATH . 'wp-admin/includes/image.php');
+}
 spl_autoload_register(function ($class) {
     $prefix = 'LB\\CreeBuildings\\';
     $baseDir = __DIR__ . '/includes/';

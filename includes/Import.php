@@ -2,111 +2,106 @@
 
 namespace LB\CreeBuildings;
 
-use LB\CreeBuildings\DataHandler\ProjectDataHandler,
-    LB\CreeBuildings\DataHandler\ProjectImageDataHandler,
-    LB\CreeBuildings\Utils\GeneralUtility,
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+use LB\CreeBuildings\Import\PartnerListImporter,
+    LB\CreeBuildings\Import\ProjectImporter,
+    LB\CreeBuildings\Import\ProjectPropertyImporter,
+    LB\CreeBuildings\Import\ProjectListImporter,
     LB\CreeBuildings\Service\AbstractService,
     LB\CreeBuildings\Service\ConfigurationService,
     LB\CreeBuildings\Service\CreeApiService,
     LB\CreeBuildings\Service\LogService,
     LB\CreeBuildings\Service\DatabaseService,
+    LB\CreeBuildings\Exception\CriticalException,
+    LB\CreeBuildings\Repository\Partner\PartnerRepository,
     LB\CreeBuildings\Repository\ProjectRepository,
-    LB\CreeBuildings\Repository\ProjectImageRepository,
-    LB\CreeBuildings\DataHandler\WordpressDataHandler,
+    LB\CreeBuildings\Repository\ProjectAttachmentRepository,
     LB\CreeBuildings\Repository\ProjectPropertyRepository;
 
 /**
  * Description of MainController
  * @author Lubos Babocky <babocky@gmail.com>
  */
-class Import extends AbstractService {
+class Import extends AbstractService
+{
 
-    protected ConfigurationService $configurationService;
-    protected CreeApiService $creeApiService;
-    protected LogService $logService;
-    protected DatabaseService $databaseService;
-    protected ProjectRepository $projectRepository;
-    protected ProjectPropertyRepository $projectPropertyRepository;
-    protected float $executionStart;
+    private ConfigurationService $configurationService;
+    private CreeApiService $creeApiService;
+    private LogService $logService;
+    private DatabaseService $databaseService;
+    private ProjectRepository $projectRepository;
 
-    public function __destruct() {
-        echo sprintf('<br>Import terminated after %ss', microtime(true) - $this->executionStart);
-    }
-
-    protected function injectDependencies(): void {
+    protected function injectDependencies(): void
+    {
         $this->configurationService = ConfigurationService::GetInstance();
         $this->creeApiService = CreeApiService::GetInstance();
         $this->logService = LogService::GetInstance();
         $this->databaseService = DatabaseService::GetInstance();
         $this->projectRepository = $this->databaseService->getRepository(ProjectRepository::class);
-        $this->projectPropertyRepository = $this->databaseService->getRepository(ProjectPropertyRepository::class);
-        $this->executionStart = microtime(true);
     }
 
-    public function runImport(): void {
+    /**
+     * @return void
+     */
+    public function runImport(): void
+    {
+        //(new \LB\CreeBuildings\Utils\ImportDataCleaner())->resetProjectForImport('8LGS9Q1UM0N1S');
         try {
-            $this->logService->writeAccessLog('Import started');
-            $this->updateProjectPropertyData();
-            $this->updateBaseProjectData();
-            $this->updateAllProjectData();
-            $this->updateAllImagePublicUrls();
-            (new WordpressDataHandler())->handle();
+            $this->importPartners();
+            $this->importProjectProperties();
+            $this->importBaseProjectData();
+            $this->importProjects();
+        } catch (CriticalException $ex) {
+            $ex->handle();
         } catch (\Exception $ex) {
             $this->logService->handleException($ex);
         }
     }
 
-    protected function updateProjectPropertyData(): void {
-        $insertData = [];
-        $projectPropertiesData = $this->creeApiService->loadProjectPropertyList();
-        foreach ($projectPropertiesData as $propertyCategory) {
-            foreach (GeneralUtility::GetMultiArrayValue($propertyCategory, 'definitions') as $property) {
-                $insertData[] = [
-                    ':uid' => sprintf(
-                            '%s-%s',
-                            GeneralUtility::GetMultiArrayValue($propertyCategory, 'group.id'),
-                            GeneralUtility::GetMultiArrayValue($property, 'id')
-                    ),
-                    ':group_id' => GeneralUtility::GetMultiArrayValue($propertyCategory, 'group.id'),
-                    ':group_name' => GeneralUtility::GetMultiArrayValue($propertyCategory, 'group.displayName'),
-                    ':property_id' => GeneralUtility::GetMultiArrayValue($property, 'id'),
-                    ':property_name' => GeneralUtility::GetMultiArrayValue($property, 'displayName')
-                ];
-            }
-        }
-        $this->projectPropertyRepository->insertAllBaseProjectPropertyData($insertData);
-        $this->logService->writeAccessLog('Table lb_creebuildings_project_property updated.');
+    private function importPartners(): void
+    {
+        (new PartnerListImporter(
+            apiService: $this->creeApiService,
+            logService: $this->logService,
+            repository: $this->databaseService->getRepository(PartnerRepository::class),
+        ))->run();
     }
 
-    protected function updateBaseProjectData(): void {
-        if ($this->projectRepository->getLastUpdate() !== date('Y-m-d')) {
-            $this->logService->writeAccessLog('Project base data require update');
-            $insertData = [];
-            foreach ($this->creeApiService->loadAllProjects() as $projectData) {
-                $insertData[] = [':projectId' => $projectData['id'], ':accessType' => $projectData['accessType']];
-            }
-            $this->projectRepository->insertAllBaseProjectData($insertData);
-            $this->logService->writeAccessLog('Project base data updated');
-        } else {
-            $this->logService->writeAccessLog('Project base data already updated');
-        }
+    private function importProjectProperties(): void
+    {
+        (new ProjectPropertyImporter(
+            apiService: $this->creeApiService,
+            logService: $this->logService,
+            repository: $this->databaseService->getRepository(ProjectPropertyRepository::class)
+        ))->run();
     }
 
-    protected function updateAllProjectData(): void {
-        if (empty($projectsToUpdate = $this->projectRepository->loadUnporcessedProjects())) {
-            $this->logService->writeAccessLog('No project update required');
-            return;
-        }
-        foreach (array_column($projectsToUpdate, 'project_id') as $projectId) {
-            (new ProjectDataHandler())->processApiData($this->creeApiService->loadProject($projectId));
-        }
+    /**
+     * @return void
+     */
+    private function importBaseProjectData(): void
+    {
+        (new ProjectListImporter(
+            apiService: $this->creeApiService,
+            logService: $this->logService,
+            repository: $this->databaseService->getRepository(ProjectRepository::class)
+        ))->run();
     }
 
-    protected function updateAllImagePublicUrls(): void {
-        $unprocessedImages = $this->databaseService->getRepository(ProjectImageRepository::class)->findUnprocessedImages();
-        $this->logService->writeAccessLog(sprintf('Unprocessed images found, calling api for %d of them', count($unprocessedImages)));
-        foreach ($unprocessedImages as $imageData) {
-            (new ProjectImageDataHandler($imageData))->processImage();
-        }
+    /**
+     * @return void
+     */
+    protected function importProjects(): void
+    {
+        (new ProjectImporter(
+            configurationService: $this->configurationService,
+            apiService: $this->creeApiService,
+            logService: $this->logService,
+            repository: $this->databaseService->getRepository(ProjectRepository::class),
+            attachmentRepository: $this->databaseService->getRepository(ProjectAttachmentRepository::class)
+        ))->run();
     }
 }
